@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Café Cumbre Huila</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: amanecer en la cordillera — hero de paisaje generativo, historia con escena fija, mapa topográfico, rueda de sabores conectada al catálogo */
+:root{
+  --bg:#0B1813; --surface:#12241C; --surface-2:#1A3227; --line:#274233; --line-2:#36594A;
+  --fg:#F1ECE0; --muted:#A6B3A8; --dim:#5E7366;
+  --cherry:#E5473D; --cherry-deep:#B32F28; --honey:#EDB54F; --leaf:#86C493; --plum:#B98AD0; --cream:#F6E7C1;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:18px; --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:80;background:var(--bg)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:inherit}
+::selection{background:var(--cherry);color:#fff}
+:focus-visible{outline:2px solid var(--honey);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1220px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.02;text-wrap:balance;margin:0;letter-spacing:-.025em}
+h2{font-size:clamp(2.2rem,5.6vw,4.2rem);font-weight:800}
+h3{font-size:1.25rem;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--honey);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+section{padding-block:clamp(72px,11vw,140px);position:relative}
+.sec-head{display:grid;gap:16px;max-width:760px;margin-bottom:52px}
+.sec-head p{color:var(--muted);font-size:1.1rem;max-width:60ch}
+.grad{background:linear-gradient(100deg,var(--honey),var(--cherry) 60%,var(--plum));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* barra de progreso + cinta demo */
+.progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--leaf),var(--honey),var(--cherry));z-index:85}
+.demo{background:var(--honey);color:#1B1408;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-align:center;padding-block:6px;text-transform:uppercase;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* navegación */
+header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:70;transition:background .4s,border-color .4s;border-bottom:1px solid transparent}
+header.nav.scrolled{background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:800;font-size:1.3rem;letter-spacing:-.03em}
+.brand svg{width:36px;height:36px;transition:transform .6s var(--ease)}
+.brand:hover svg{transform:rotate(-12deg) scale(1.1)}
+.nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 70%,transparent);border:1px solid var(--line)}
+.nav ul a{display:block;text-decoration:none;color:var(--muted);font-weight:500;font-size:.9rem;padding:8px 14px;border-radius:999px;transition:color .2s,background .2s}
+.nav ul a:hover,.nav ul a.on{color:var(--fg);background:var(--surface-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;cursor:pointer;font:600 .96rem var(--body);text-decoration:none;padding:14px 22px;border-radius:999px;transition:background .25s,box-shadow .25s,color .25s,border-color .25s;position:relative;white-space:nowrap}
+.btn-primary{background:var(--cherry);color:#fff;box-shadow:0 10px 30px -10px var(--cherry),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary:hover{background:var(--cherry-deep);box-shadow:0 16px 40px -10px var(--cherry)}
+.btn-ghost{background:color-mix(in srgb,var(--bg) 40%,transparent);color:var(--fg);border:1px solid var(--line-2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn-ghost:hover{border-color:var(--honey);color:var(--honey)}
+.btn-wa{background:#25D366;color:#06210F;box-shadow:0 10px 30px -10px #25D366}
+.btn-wa:hover{background:#1FB958}
+.btn .arr{transition:transform .3s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+.burger{display:none;background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:12px;width:46px;height:46px;cursor:pointer}
+@media (max-width:980px){
+  .nav ul,.nav .cta-nav{display:none}
+  .burger{display:grid;place-items:center}
+  .nav.open{background:var(--bg)}
+  .nav.open ul{display:grid;position:absolute;top:72px;left:0;right:0;border-radius:0;background:var(--bg);padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));border:0;border-bottom:1px solid var(--line)}
+  .nav.open ul a{font-size:1.2rem;padding:12px 4px}
+}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;margin-top:-72px;padding-block:calc(72px + clamp(48px,8vw,110px)) clamp(56px,8vw,96px);min-height:min(860px,100svh)}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:160px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
+.hero .hero-main{position:relative;z-index:2;display:grid;grid-template-columns:1.25fr .75fr;gap:48px;align-items:end}
+.hero-copy{display:grid;gap:28px}
+.hero h1{font-size:clamp(3rem,8.4vw,7.4rem);font-weight:800;letter-spacing:-.045em;line-height:.92;text-shadow:0 4px 40px rgba(11,24,19,.55)}
+.hero h1 .w{display:inline-block;animation:rise 1s var(--ease) backwards}
+.hero h1 .thin{font-weight:300;font-style:normal}
+.alt-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:clamp(.8rem,1.4vw,1rem);font-weight:600;letter-spacing:0;background:var(--honey);color:#1B1408;padding:6px 12px;border-radius:999px;vertical-align:middle;text-shadow:none;transform:translateY(-.4em)}
+@keyframes rise{from{transform:translateY(.5em) rotate(2deg);opacity:0}}
+.hero-copy>p{color:#D8D6CA;font-size:1.18rem;max-width:44ch;text-shadow:0 2px 20px rgba(11,24,19,.8)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.lot{position:relative;border-radius:24px;padding:24px;display:grid;gap:16px;background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(241,236,224,.14);box-shadow:0 30px 80px -30px rgba(0,0,0,.7);transition:transform .25s ease-out;transform-style:preserve-3d;animation:rise 1.2s .5s var(--ease) backwards}
+.lot-top{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.lot small{color:var(--muted);font-size:.78rem;display:block}
+.score{font-family:var(--display);font-weight:800;font-size:3.2rem;line-height:.9;color:var(--honey)}
+.lot svg{width:100%;height:auto;display:block}
+.lot-notes{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.75rem;padding:4px 10px;border-radius:999px;background:rgba(241,236,224,.08);border:1px solid rgba(241,236,224,.12)}
+.hero-stats{position:relative;z-index:2;margin-top:56px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(241,236,224,.18)}
+.hero-stats div{padding:18px 18px 0 0;display:grid;gap:4px}
+.hero-stats b{font-family:var(--display);font-size:clamp(1.8rem,3.4vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1}
+.hero-stats span{font-size:.82rem;color:var(--muted)}
+.scroll-hint{position:absolute;left:50%;bottom:22px;z-index:3;transform:translateX(-50%);display:grid;justify-items:center;gap:6px;font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.scroll-hint i{width:22px;height:36px;border:1.5px solid var(--muted);border-radius:12px;position:relative}
+.scroll-hint i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;border-radius:2px;background:var(--honey);transform:translateX(-50%);animation:wheel 1.8s infinite}
+@keyframes wheel{to{transform:translate(-50%,12px);opacity:0}}
+@media (max-width:900px){.hero .hero-main{grid-template-columns:1fr}.hero-stats{grid-template-columns:repeat(2,1fr)}.scroll-hint{display:none}}
+
+/* marquee */
+.marquee{overflow:hidden;padding-block:18px;border-block:1px solid var(--line);background:var(--surface)}
+.marquee-track{display:inline-flex;gap:48px;white-space:nowrap;animation:mq 34s linear infinite;font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.6rem);letter-spacing:-.03em}
+.marquee-track span{display:inline-flex;align-items:center;gap:48px}
+.marquee-track span:nth-child(even){-webkit-text-stroke:1.2px var(--fg);color:transparent}
+.marquee-track span::after{content:"";width:18px;height:26px;border-radius:50%;background:var(--cherry);box-shadow:inset -5px 0 0 var(--cherry-deep)}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* nosotros */
+.manifesto{font-family:var(--display);font-weight:600;font-size:clamp(1.7rem,3.8vw,3.2rem);line-height:1.15;letter-spacing:-.025em;max-width:30ch}
+.manifesto .wd{color:var(--dim);transition:color .4s}
+.manifesto .wd.lit{color:var(--fg)}
+.manifesto .wd.hl.lit{color:var(--honey)}
+.mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:64px}
+.spot{position:relative;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);overflow:hidden;isolation:isolate}
+.spot::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .4s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--honey) 16%,transparent),transparent 60%)}
+.spot:hover::before{opacity:1}
+.mv{padding:36px;display:grid;gap:16px;align-content:start}
+.mv .big{font-family:var(--display);font-size:9rem;font-weight:800;line-height:.75;position:absolute;right:20px;bottom:-14px;color:var(--surface-2);z-index:-1}
+.mv p{color:var(--muted);max-width:52ch}
+@media (max-width:760px){.mv-grid{grid-template-columns:1fr}}
+
+/* historia: del árbol a la taza */
+.story-sec{background:linear-gradient(180deg,var(--bg),var(--surface) 20%,var(--surface) 80%,var(--bg))}
+.story{display:grid;grid-template-columns:1fr 1fr;gap:64px}
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 110px);height:min(560px,70vh);border-radius:28px;background:radial-gradient(90% 80% at 50% 40%,#1F3B2E,#0E1E17);border:1px solid var(--line);overflow:hidden}
+.stage .scn{position:absolute;inset:0;display:grid;place-items:center;padding:28px;opacity:0;transform:scale(.94) translateY(16px);transition:opacity .7s var(--ease),transform .9s var(--ease)}
+.stage .scn.on{opacity:1;transform:none}
+.stage svg{width:100%;height:100%;max-height:100%}
+.stage-meta{position:absolute;left:20px;right:20px;top:18px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.72rem;color:var(--muted);z-index:2}
+.stage-bar{position:absolute;left:20px;right:20px;bottom:18px;height:3px;border-radius:3px;background:var(--line);z-index:2;overflow:hidden}
+.stage-bar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--honey),var(--cherry));transition:width .6s var(--ease)}
+.steps{display:grid}
+.step{min-height:62vh;display:grid;align-content:center;gap:14px;padding-block:32px;opacity:.35;transition:opacity .5s}
+.step.on{opacity:1}
+.step .num{font-family:var(--mono);font-size:.8rem;color:var(--honey)}
+.step h3{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.03em}
+.step p{color:var(--muted);font-size:1.08rem;max-width:44ch}
+.step .facts{display:flex;flex-wrap:wrap;gap:8px}
+.step .facts span{font-family:var(--mono);font-size:.75rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);color:var(--leaf)}
+.step .mini{display:none}
+@media (max-width:900px){.story{grid-template-columns:1fr;gap:0}.stage{display:none}.step{min-height:0;opacity:1;padding-block:28px;border-top:1px solid var(--line)}.step .mini{display:block;border-radius:20px;background:radial-gradient(90% 80% at 50% 40%,#1F3B2E,#0E1E17);border:1px solid var(--line);aspect-ratio:1/1;max-width:100%;padding:18px}.step .mini svg{width:100%;height:100%}}
+
+/* animaciones de las escenas */
+.sway{animation:sway 5s ease-in-out infinite;transform-origin:60px 60px;transform-box:view-box}
+@keyframes sway{50%{transform:rotate(2.5deg)}}
+.bub{animation:bub 3.2s ease-in infinite}
+@keyframes bub{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-150px);opacity:0}}
+.rays{animation:spin 30s linear infinite;transform-origin:320px 80px;transform-box:view-box}
+.drum{animation:spin 6s linear infinite;transform-origin:320px 300px;transform-box:view-box}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hum{animation:hum 4s var(--ease) infinite alternate}
+@keyframes hum{from{width:200px}to{width:42px}}
+.curve{stroke-dasharray:520;stroke-dashoffset:520}
+.scn.on .curve{animation:draw 2.8s .3s var(--ease) forwards}
+.step .mini .curve{stroke-dashoffset:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* servicios */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.svc{padding:32px;display:grid;gap:18px;align-content:start;transition:transform .4s var(--ease),border-color .4s}
+.svc:hover{transform:translateY(-6px);border-color:var(--line-2)}
+.svc .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line)}
+.svc .ic svg{width:32px;height:32px}
+.svc p{color:var(--muted)}
+.svc ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:.93rem}
+.svc li{display:flex;gap:10px;align-items:baseline}
+.svc li::before{content:"";flex:none;width:8px;height:11px;border-radius:50%;background:var(--cherry);transform:translateY(1px)}
+.svc a.more{color:var(--honey);text-decoration:none;font-weight:600;font-size:.93rem;display:inline-flex;gap:8px;align-items:center}
+.svc a.more:hover{text-decoration:underline}
+.svc .pr{font-family:var(--mono);font-size:.8rem;color:var(--fg);padding-top:14px;border-top:1px dashed var(--line-2)}
+@media (max-width:900px){.services{grid-template-columns:1fr}}
+
+/* fincas */
+.farms{display:grid;grid-template-columns:1.4fr .6fr;gap:20px;align-items:stretch}
+.topo{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#0D1C15;min-height:420px}
+.topo svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.farm-pin{cursor:pointer}
+.farm-pin .halo{transform-box:fill-box;transform-origin:center;animation:halo 2.4s ease-out infinite}
+@keyframes halo{0%{transform:scale(.5);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+.pulse{animation:halo 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.farm-pin .core{transition:r .3s}
+.farm-pin.on .core{fill:var(--honey)}
+.farm-card{display:grid;gap:14px;padding:28px;align-content:start}
+.farm-card .fam{font-family:var(--display);font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.92rem;margin:0}
+.kv dt{color:var(--muted);font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;padding-top:3px}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.farm-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.farm-list button{border:1px solid var(--line-2);background:none;color:var(--muted);padding:8px 14px;border-radius:999px;font:500 .85rem var(--body);cursor:pointer;transition:all .2s}
+.farm-list button[aria-pressed="true"]{background:var(--honey);color:#1B1408;border-color:var(--honey)}
+.alt-meter{height:8px;border-radius:8px;background:var(--surface-2);overflow:hidden}
+.alt-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--leaf),var(--honey));border-radius:8px;transition:width .6s var(--ease)}
+@media (max-width:900px){.farms{grid-template-columns:1fr}.topo{min-height:340px}}
+
+/* catálogo */
+.cat-head{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;margin-bottom:40px}
+.wheel-box{display:grid;justify-items:center;gap:12px}
+.wheel{width:min(300px,80vw);height:auto;overflow:visible}
+.wheel .seg{cursor:pointer;transition:transform .35s var(--ease),opacity .3s;transform-origin:160px 160px;transform-box:view-box}
+.wheel .seg:hover{transform:scale(1.05)}
+.wheel.filtering .seg:not(.on){opacity:.3}
+.wheel text{pointer-events:none;font-family:var(--body);font-weight:600;font-size:12px}
+.wheel-hint{font-size:.82rem;color:var(--muted);text-align:center}
+.clear{background:none;border:0;color:var(--honey);font:600 .85rem var(--body);cursor:pointer;text-decoration:underline}
+.cat-layout{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:start}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.prod{display:grid;grid-template-rows:auto 1fr;transition:transform .45s var(--ease),border-color .3s}
+.prod:hover{transform:translateY(-6px);border-color:var(--line-2)}
+.bag-wrap{height:230px;display:grid;place-items:center;position:relative;perspective:700px;overflow:hidden}
+.bag-wrap::after{content:"";position:absolute;bottom:22px;width:120px;height:18px;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(8px);transition:transform .5s var(--ease)}
+.bag{height:190px;width:auto;position:relative;z-index:1;transition:transform .7s cubic-bezier(.3,1.5,.5,1);filter:drop-shadow(0 18px 20px rgba(0,0,0,.35))}
+.prod:hover .bag{transform:rotateY(-22deg) rotateZ(-3deg) translateY(-10px)}
+.prod:hover .bag-wrap::after{transform:scale(.8)}
+.sca{position:absolute;top:14px;right:14px;z-index:2;font-family:var(--mono);font-size:.72rem;padding:5px 10px;border-radius:999px;background:var(--bg);color:var(--honey);border:1px solid var(--line)}
+.badge{position:absolute;top:14px;left:14px;z-index:2;font-size:.7rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--cherry);color:#fff}
+.prod-body{padding:20px;display:grid;gap:12px;align-content:start}
+.prod-body .sub{color:var(--muted);font-size:.88rem}
+.roastm{display:flex;align-items:center;gap:10px;font-size:.75rem;color:var(--muted);font-family:var(--mono)}
+.roastm i{display:flex;gap:3px}
+.roastm b{width:14px;height:6px;border-radius:3px;background:var(--line)}
+.notes{display:flex;flex-wrap:wrap;gap:6px}
+.notes span{font-size:.75rem;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--fg)}
+.notes span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--c)}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sizes button{border:1px solid var(--line);background:none;color:var(--muted);border-radius:10px;padding:8px 0;font:500 .8rem var(--mono);cursor:pointer;transition:all .2s}
+.sizes button[aria-pressed="true"]{border-color:var(--honey);color:var(--honey);background:color-mix(in srgb,var(--honey) 8%,transparent)}
+.prod-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.price{font-family:var(--display);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.price small{display:block;font-family:var(--body);font-size:.72rem;font-weight:400;color:var(--muted);letter-spacing:0}
+.add{width:50px;height:50px;border-radius:50%;border:0;background:var(--cherry);color:#fff;font-size:1.6rem;cursor:pointer;display:grid;place-items:center;transition:transform .35s var(--ease),background .2s}
+.add:hover{transform:rotate(90deg) scale(1.08);background:var(--cherry-deep)}
+.noresults{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:var(--r)}
+.order{position:sticky;top:calc(env(safe-area-inset-top,0px) + 96px);padding:24px;display:grid;gap:16px;background:linear-gradient(160deg,var(--surface-2),var(--surface))}
+.order-h{display:flex;justify-content:space-between;align-items:center}
+.count{font-family:var(--mono);font-size:.75rem;background:var(--cherry);color:#fff;border-radius:999px;padding:3px 10px}
+.order ul{list-style:none;margin:0;padding:0;display:grid;gap:12px;max-height:280px;overflow:auto}
+.order li{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:.9rem;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.order li small{color:var(--muted);font-family:var(--mono);font-size:.72rem}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{background:var(--bg);border:1px solid var(--line);color:var(--fg);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.9rem;line-height:1}
+.empty{color:var(--muted);font-size:.9rem;padding:20px;border:1px dashed var(--line-2);border-radius:12px;text-align:center}
+.sub-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.88rem;padding:12px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);cursor:pointer}
+.sub-toggle input{appearance:none;width:42px;height:24px;border-radius:999px;background:var(--line-2);position:relative;cursor:pointer;transition:background .25s;flex:none;margin:0}
+.sub-toggle input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--fg);transition:transform .25s var(--ease)}
+.sub-toggle input:checked{background:var(--leaf)}
+.sub-toggle input:checked::after{transform:translateX(18px)}
+.sum{display:grid;gap:6px;font-size:.88rem;color:var(--muted)}
+.sum div{display:flex;justify-content:space-between}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line-2);padding-top:12px}
+.total b{font-family:var(--display);font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:inline-block}
+.ship{height:6px;border-radius:6px;background:var(--bg);overflow:hidden}
+.ship i{display:block;height:100%;background:linear-gradient(90deg,var(--leaf),var(--honey));transition:width .5s var(--ease)}
+.ship-t{font-size:.8rem;color:var(--leaf)}
+.toast{font-size:.85rem;color:var(--leaf);min-height:1.2em;text-align:center}
+.flybean{position:fixed;z-index:95;width:18px;height:26px;border-radius:50%;background:var(--cherry);box-shadow:inset -6px 0 0 var(--cherry-deep);pointer-events:none}
+@media (max-width:1020px){.cat-layout{grid-template-columns:1fr}.order{position:static}.cat-head{grid-template-columns:1fr}}
+
+/* clientes */
+.logos{overflow:hidden;border-block:1px solid var(--line);padding-block:30px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.logos-track{display:inline-flex;gap:72px;align-items:center;white-space:nowrap;animation:mq 40s linear infinite}
+.logos:hover .logos-track{animation-play-state:paused}
+.lg{display:inline-flex;align-items:center;gap:10px;color:var(--muted);transition:color .3s;font-size:1.5rem}
+.lg:hover{color:var(--fg)}
+.lg1{font-family:var(--display);font-weight:300;font-style:italic;letter-spacing:-.02em}
+.lg2{font-family:var(--mono);font-weight:600;font-size:1.1rem;letter-spacing:.2em;text-transform:uppercase}
+.lg3{font-family:var(--display);font-weight:800;letter-spacing:-.05em}
+.lg4{font-family:var(--body);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:1.15rem}
+.lg5{font-family:var(--display);font-weight:600;letter-spacing:-.02em}
+.lg6{font-family:var(--body);font-style:italic;font-size:1.6rem}
+.testi{display:grid;grid-template-columns:.8fr 1.2fr;gap:20px;margin-top:48px}
+.rating{padding:36px;display:grid;gap:10px;align-content:center}
+.rating .n{font-family:var(--display);font-size:6rem;font-weight:800;line-height:.85;letter-spacing:-.05em}
+.stars{color:var(--honey);font-size:1.3rem;letter-spacing:4px}
+.rating p{color:var(--muted)}
+.slider{padding:40px;display:grid;gap:22px;min-height:300px;align-content:space-between}
+.slides{position:relative;min-height:170px}
+.slide{position:absolute;inset:0;display:grid;gap:18px;align-content:start;opacity:0;transform:translateX(30px);transition:opacity .6s var(--ease),transform .6s var(--ease);pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto}
+.slide q{font-family:var(--display);font-size:clamp(1.25rem,2.4vw,1.75rem);font-weight:600;line-height:1.3;letter-spacing:-.015em;quotes:"“" "”"}
+.who{display:flex;align-items:center;gap:14px;font-size:.9rem;color:var(--muted)}
+.who b{color:var(--fg);display:block}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;color:#1B1408}
+.dots{display:flex;gap:8px}
+.dots button{width:28px;height:6px;border-radius:6px;border:0;background:var(--line-2);cursor:pointer;transition:all .3s;padding:0}
+.dots button[aria-current="true"]{width:52px;background:var(--honey)}
+@media (max-width:860px){.testi{grid-template-columns:1fr}.slides{min-height:230px}}
+
+/* contacto */
+.contact{display:grid;grid-template-columns:1.05fr .95fr;gap:20px}
+.form{padding:36px;display:grid;gap:18px}
+.field{display:grid;gap:8px}
+.field label{font-size:.82rem;color:var(--muted);font-weight:500}
+.field input,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;color:var(--fg);font:400 1rem var(--body);transition:border-color .2s,box-shadow .2s;resize:vertical}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--honey);box-shadow:0 0 0 4px color-mix(in srgb,var(--honey) 18%,transparent)}
+.seg-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg-pick input{position:absolute;opacity:0;pointer-events:none}
+.seg-pick label{display:grid;justify-items:center;gap:6px;padding:14px 8px;border-radius:12px;border:1px solid var(--line);cursor:pointer;color:var(--muted);font-size:.85rem;transition:all .2s;text-align:center}
+.seg-pick label svg{width:24px;height:24px}
+.seg-pick input:checked+label{border-color:var(--honey);color:var(--fg);background:color-mix(in srgb,var(--honey) 8%,transparent)}
+.seg-pick input:focus-visible+label{outline:2px solid var(--honey);outline-offset:2px}
+.err{color:var(--cherry);font-size:.85rem;min-height:1.2em}
+.info{display:grid;gap:20px;grid-template-rows:auto 1fr}
+.info-card{padding:28px;display:grid;gap:14px}
+.c-row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center}
+.c-row .ic{width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center}
+.c-row small{display:block;color:var(--muted);font-size:.76rem}
+.c-row span{overflow-wrap:anywhere}
+.chipbtn{background:none;border:1px solid var(--line-2);color:var(--muted);border-radius:999px;padding:6px 12px;font:500 .78rem var(--body);cursor:pointer;text-decoration:none;white-space:nowrap}
+.chipbtn:hover{color:var(--honey);border-color:var(--honey)}
+.hours{display:grid;gap:6px;font-size:.88rem}
+.hours div{display:flex;justify-content:space-between;gap:12px}
+.open-now{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:var(--leaf);font-weight:600}
+.open-now::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px color-mix(in srgb,currentColor 25%,transparent)}
+.minimap{position:relative;min-height:240px;overflow:hidden}
+.minimap svg{position:absolute;inset:0;width:100%;height:100%}
+.minimap .addr{position:absolute;left:14px;right:14px;bottom:14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:12px 14px;border-radius:12px;border:1px solid var(--line)}
+.socials{display:flex;gap:10px}
+.socials a{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;transition:all .25s}
+.socials a:hover{background:var(--cherry);border-color:var(--cherry);transform:translateY(-3px)}
+@media (max-width:900px){.contact{grid-template-columns:1fr}}
+
+/* footer */
+footer.site{padding-block:72px 32px;border-top:1px solid var(--line);overflow:hidden}
+.giant{font-family:var(--display);font-weight:800;font-size:clamp(4rem,19vw,17rem);line-height:.8;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.5px var(--line-2);text-align:center;transition:color .6s;user-select:none}
+.giant:hover{color:var(--surface-2)}
+.foot-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;color:var(--muted);font-size:.85rem;margin-top:32px}
+
+/* WhatsApp flotante */
+.wa{position:fixed;right:calc(22px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:75;width:64px;height:64px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 14px 34px -8px rgba(37,211,102,.65);transition:transform .3s var(--ease)}
+.wa:hover{transform:scale(1.1) rotate(-8deg)}
+.wa::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #25D366;animation:ring 2.4s ease-out infinite}
+@keyframes ring{to{transform:scale(1.7);opacity:0}}
+.wa-tip{position:absolute;right:76px;white-space:nowrap;background:var(--fg);color:var(--bg);font-size:.84rem;font-weight:600;padding:9px 14px;border-radius:12px;opacity:0;transform:translateX(10px);transition:all .3s var(--ease);pointer-events:none}
+.wa:hover .wa-tip,.wa.peek .wa-tip{opacity:1;transform:none}
+
+/* cursor */
+.cursor{position:fixed;left:0;top:0;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;border:1.5px solid var(--honey);pointer-events:none;z-index:99;transition:width .25s,height .25s,margin .25s,background .25s,opacity .3s;opacity:0;mix-blend-mode:difference}
+.cursor.big{width:64px;height:64px;margin:-32px 0 0 -32px;background:var(--honey)}
+@media (hover:none),(pointer:coarse){.cursor{display:none}}
+
+/* revelado */
+.rv{transition:transform 1s var(--ease)}
+.rv.pre{transform:translateY(40px)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv.pre{transform:none}.curve{stroke-dashoffset:0}.cursor{display:none}}
+
+[hidden]{display:none!important}
+body{margin:0}
+</style>
+</head>
+<body>
+
+
+<div class="progress" id="progress"></div>
+<div class="demo">Página de demostración · Empresa ficticia</div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Café Cumbre, inicio">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 33 L15 11 L21 21 L27 13 L37 33 Z" fill="#EDB54F"/><path d="M15 11 L18.5 17.5 L15.5 16 L12.6 18.2Z" fill="#F6E7C1"/><ellipse cx="20" cy="28.5" rx="7.5" ry="5" fill="#E5473D"/><path d="M20 23.6 C17.6 26 22.4 31 20 33.4" stroke="#0B1813" stroke-width="1.5" fill="none"/></svg>
+      Café Cumbre
+    </a>
+    <ul id="menu">
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#fincas">Fincas</a></li>
+      <li><a href="#catalogo">Catálogo</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a class="btn btn-primary cta-nav mag" href="#catalogo">Comprar café <span class="arr">→</span></a>
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+</header>
+
+<main id="inicio">
+<!-- HERO -->
+<section class="hero" id="hero">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="wrap hero-main">
+    <div class="hero-copy">
+      <span class="eyebrow">Tostadores de origen · Pitalito, Huila</span>
+      <h1 aria-label="Café que nace entre las nubes del Huila">
+        <span class="w" style="animation-delay:.05s">Café</span> <span class="w thin" style="animation-delay:.12s">que</span> <span class="w" style="animation-delay:.19s">nace</span><br>
+        <span class="w thin" style="animation-delay:.26s">entre</span> <span class="w thin" style="animation-delay:.33s">las</span> <span class="w grad" style="animation-delay:.4s">nubes</span><br>
+        <span class="w" style="animation-delay:.47s">del</span> <span class="w" style="animation-delay:.54s">Huila</span> <span class="w" style="animation-delay:.7s"><span class="alt-badge">▲ 1.850 msnm</span></span>
+      </h1>
+      <p>Compramos directo a 42 familias caficultoras y tostamos cada lote en tandas pequeñas, para hogares, cafeterías y empresas en toda Colombia.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary mag" href="#catalogo">Ver catálogo y precios <span class="arr">→</span></a>
+        <a class="btn btn-ghost mag" href="#proceso">Conocer el proceso</a>
+      </div>
+    </div>
+    <aside class="lot" id="lot" aria-label="Lote destacado">
+      <div class="lot-top">
+        <div><small>Lote del mes</small><h3 style="font-size:1.35rem">Finca La Esperanza</h3><small class="mono">Geisha · Lavado · 1.950 msnm</small></div>
+        <div style="text-align:right"><div class="score mono">88</div><small>Puntaje SCA</small></div>
+      </div>
+      <svg viewBox="0 0 300 80" aria-label="Curva de tueste del lote">
+        <defs><linearGradient id="lg1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#EDB54F" stop-opacity=".45"/><stop offset="1" stop-color="#EDB54F" stop-opacity="0"/></linearGradient></defs>
+        <path d="M0 8 C14 50 26 66 40 66 C90 62 150 34 220 20 C250 15 280 12 300 10 L300 80 L0 80Z" fill="url(#lg1)"/>
+        <path d="M0 8 C14 50 26 66 40 66 C90 62 150 34 220 20 C250 15 280 12 300 10" fill="none" stroke="#EDB54F" stroke-width="2.5"/>
+        <circle cx="230" cy="18.5" r="5" fill="#E5473D"/><text x="224" y="38" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="end">1er crack 9:40</text>
+      </svg>
+      <div class="lot-notes"><span class="tag">Jazmín</span><span class="tag">Durazno</span><span class="tag">Té negro</span><span class="tag">Miel</span></div>
+      <a class="btn btn-ghost" href="#catalogo">Pedir este café <span class="arr">→</span></a>
+    </aside>
+  </div>
+  <div class="wrap">
+    <div class="hero-stats">
+      <div><b class="mono" data-count="42">42</b><span>familias aliadas</span></div>
+      <div><b class="mono" data-count="86.5" data-dec="1">86,5</b><span>puntaje SCA promedio</span></div>
+      <div><b class="mono" data-count="120">120</b><span>empresas clientes</span></div>
+      <div><b class="mono" data-count="48">48</b><span>horas del tueste a su puerta</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><i></i>Bajar</div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  <span>Origen Huila</span><span>Tueste artesanal</span><span>Comercio directo</span><span>Envíos a toda Colombia</span><span>Café de especialidad</span><span>Trazable</span>
+  <span>Origen Huila</span><span>Tueste artesanal</span><span>Comercio directo</span><span>Envíos a toda Colombia</span><span>Café de especialidad</span><span>Trazable</span>
+</div></div>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="wrap">
+    <span class="eyebrow" style="margin-bottom:28px">Nosotros · Desde 2014</span>
+    <p class="manifesto" id="manifesto">Empezamos en la finca de los Ramírez, en la vereda Bruselas. Hoy pagamos a cada familia hasta un *40% más* que el precio de referencia, catamos cada lote antes de comprarlo y lo tostamos solo cuando usted lo pide. Así llega a su taza un café *fresco, justo y trazable.*</p>
+    <div class="mv-grid">
+      <article class="mv spot rv"><span class="big" aria-hidden="true">M</span><span class="eyebrow">Misión</span><h3 style="font-size:1.7rem">Llevar el mejor café del Huila a cada mesa de Colombia.</h3><p>Ofrecemos café de especialidad fresco y trazable, con un trato justo para las familias que lo cultivan y una atención cercana para quienes lo disfrutan.</p></article>
+      <article class="mv spot rv"><span class="big" aria-hidden="true">V</span><span class="eyebrow">Visión</span><h3 style="font-size:1.7rem">Ser en 2030 la tostadora de origen referente del sur del país.</h3><p>Queremos ser reconocidos por la calidad de nuestros lotes, por el impacto positivo en las comunidades cafeteras y por llevar el café del Huila a nuevos mercados.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESO -->
+<section id="proceso" class="story-sec">
+  <div class="wrap">
+    <div class="sec-head rv"><span class="eyebrow">Del árbol a la taza</span><h2>Cinco etapas que cuidamos <span class="grad">una por una.</span></h2></div>
+    <div class="story">
+      <div class="stage" id="stage" aria-hidden="true">
+        <div class="stage-meta"><span id="stageN">01 / 05</span><span id="stageT">Cosecha</span></div>
+        <div class="stage-bar"><i id="stageBar"></i></div>
+      </div>
+      <div class="steps" id="steps">
+        <article class="step on" data-i="0"><div class="mini"></div><span class="num">01 — Abril a junio</span><h3>Cosecha</h3><p>Recogemos a mano solo las cerezas rojas y maduras. Cada árbol se recorre hasta cuatro veces por temporada.</p><div class="facts"><span>100% a mano</span><span>Solo cereza madura</span></div></article>
+        <article class="step" data-i="1"><div class="mini"></div><span class="num">02 — Menos de 8 horas</span><h3>Despulpado</h3><p>El mismo día retiramos la pulpa. Debajo quedan el mucílago dulce y el grano protegido por el pergamino.</p><div class="facts"><span>Mismo día</span><span>2 granos por cereza</span></div></article>
+        <article class="step" data-i="2"><div class="mini"></div><span class="num">03 — 36 a 48 horas</span><h3>Fermentación</h3><p>En tanques controlados el mucílago se transforma y aparecen las notas frutales y dulces de cada lote.</p><div class="facts"><span>pH 4,2</span><span>18 – 22 °C</span></div></article>
+        <article class="step" data-i="3"><div class="mini"></div><span class="num">04 — 15 a 20 días</span><h3>Secado</h3><p>En camas elevadas bajo marquesinas solares, removiendo cada hora hasta bajar la humedad al 11%.</p><div class="facts"><span>53% → 11% humedad</span><span>Sol + sombra</span></div></article>
+        <article class="step" data-i="4"><div class="mini"></div><span class="num">05 — 12 minutos</span><h3>Tueste</h3><p>Tostamos en tandas de 5 kg con una curva diseñada para cada lote y empacamos con válvula el mismo día.</p><div class="facts"><span>Tandas de 5 kg</span><span>205 °C final</span></div></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="wrap">
+    <div class="sec-head rv"><span class="eyebrow">Servicios</span><h2>Café para cada necesidad.</h2><p>Atendemos desde una sola bolsa para la casa hasta el suministro mensual de una cadena de cafeterías.</p></div>
+    <div class="services">
+      <article class="svc spot rv">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#EDB54F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3c0 1.5 1.5 1.5 1.5 3M12 3c0 1.5 1.5 1.5 1.5 3"/></svg></div>
+        <h3>Para el hogar</h3><p>Café en grano o molido para su método favorito, enviado fresco a su puerta.</p>
+        <ul><li>Molienda para greca, prensa, V60 o espresso</li><li>Suscripción mensual con 10% de descuento</li><li>Envío gratis desde $120.000</li></ul>
+        <div class="pr">Desde $24.000 · 250 g</div>
+        <a class="more" data-wa="Hola Café Cumbre, quiero café para mi hogar" href="#">Pedir por WhatsApp →</a>
+      </article>
+      <article class="svc spot rv">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#E5473D" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-6 7 6v12"/><path d="M9 21v-6h6v6M9 10h6"/></svg></div>
+        <h3>Cafeterías y restaurantes</h3><p>Suministro mayorista con un perfil de tueste diseñado para su menú y su máquina.</p>
+        <ul><li>Precio especial por volumen</li><li>Capacitación de baristas incluida</li><li>Calibración de molino y máquina</li></ul>
+        <div class="pr">Desde $72.000 / kg</div>
+        <a class="more" data-wa="Hola Café Cumbre, quiero cotizar café para mi negocio" href="#">Cotizar por WhatsApp →</a>
+      </article>
+      <article class="svc spot rv">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#86C493" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S10 8 12 8c2 0 6 1 6-1.5S14 4 12 8Z"/></svg></div>
+        <h3>Empresas y regalos</h3><p>Café para la oficina y kits corporativos con el logo de su empresa.</p>
+        <ul><li>Empaque personalizado con su marca</li><li>Entregas programadas cada mes</li><li>Kits de fin de año desde 20 unidades</li></ul>
+        <div class="pr">Kits desde $45.000 c/u</div>
+        <a class="more" data-wa="Hola Café Cumbre, quiero cotizar café o regalos para mi empresa" href="#">Cotizar por WhatsApp →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FINCAS -->
+<section id="fincas" class="story-sec">
+  <div class="wrap">
+    <div class="sec-head rv"><span class="eyebrow">Nuestras fincas</span><h2>Sepa de qué montaña viene su café.</h2><p>Toque un punto del mapa para conocer a la familia, la altura y la variedad de cada finca aliada.</p></div>
+    <div class="farms">
+      <div class="topo rv"><svg id="topo" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa topográfico de las fincas aliadas"></svg></div>
+      <div class="farm-card spot rv" id="farmCard" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CATÁLOGO -->
+<section id="catalogo">
+  <div class="wrap">
+    <div class="cat-head">
+      <div class="sec-head rv" style="margin:0"><span class="eyebrow">Catálogo y precios</span><h2>Encuentre su café <span class="grad">por sabor.</span></h2><p>Toque un sabor en la rueda para ver los cafés que lo tienen. Elija la presentación y arme su pedido: se lo enviamos por WhatsApp. Precios en pesos colombianos, IVA incluido.</p></div>
+      <div class="wheel-box rv">
+        <svg class="wheel" id="wheel" viewBox="0 0 320 320" role="group" aria-label="Rueda de sabores"></svg>
+        <div class="wheel-hint" id="wheelHint">Mostrando todos los cafés</div>
+      </div>
+    </div>
+    <div class="cat-layout">
+      <div class="products" id="products"></div>
+      <aside class="order spot" id="order" aria-label="Su pedido">
+        <div class="order-h"><h3>Su pedido</h3><span class="count" id="count">0</span></div>
+        <ul id="orderList"></ul>
+        <div class="empty" id="empty">Agregue un café con el botón <b>+</b> para armar su pedido.</div>
+        <label class="sub-toggle" for="subs"><span><b style="color:var(--fg)">Suscripción mensual</b><br><small style="color:var(--muted)">Ahorre 10% cada mes</small></span><input type="checkbox" id="subs"></label>
+        <div class="sum"><div><span>Subtotal</span><span class="mono" id="subtotal">$0</span></div><div id="discRow" hidden><span>Descuento suscripción</span><span class="mono" id="disc" style="color:var(--leaf)">-$0</span></div><div><span>Envío</span><span class="mono" id="shipCost">$9.000</span></div></div>
+        <div class="total"><span>Total</span><b id="total" class="mono">$0</b></div>
+        <div class="ship"><i id="shipBar" style="width:0"></i></div>
+        <span class="ship-t" id="shipT">Envío gratis desde $120.000</span>
+        <a class="btn btn-wa" id="sendOrder" href="https://wa.me/573229214601" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg>Enviar pedido por WhatsApp</a>
+        <span class="toast" id="toast" role="status"></span>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<section id="clientes" class="story-sec" style="padding-bottom:clamp(72px,9vw,120px)">
+  <div class="wrap"><div class="sec-head rv"><span class="eyebrow">Clientes y aliados</span><h2>Empresas que ya sirven Cumbre.</h2></div></div>
+  <div class="logos" aria-label="Clientes"><div class="logos-track" id="logos"></div></div>
+  <div class="wrap">
+    <div class="testi">
+      <div class="rating spot rv"><div class="n mono">4,9</div><div class="stars" aria-label="5 estrellas">★★★★★</div><p>Calificación promedio de 312 reseñas de clientes en Google.</p></div>
+      <div class="slider spot rv" id="slider">
+        <div class="slides" id="slides"></div>
+        <div class="dots" id="dots" role="tablist" aria-label="Testimonios"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="wrap">
+    <div class="sec-head rv"><span class="eyebrow">Contacto</span><h2>Hablemos <span class="grad">de café.</span></h2><p>Escríbanos y le respondemos por WhatsApp el mismo día.</p></div>
+    <div class="contact">
+      <form class="form spot rv" id="cform" novalidate>
+        <div class="field"><label for="cname">Su nombre</label><input id="cname" autocomplete="name" placeholder="Ej. Laura Gómez"></div>
+        <div class="field"><span style="font-size:.82rem;color:var(--muted);font-weight:500">¿Para qué necesita café?</span>
+          <div class="seg-pick">
+            <input type="radio" name="tipo" id="t1" value="mi hogar" checked><label for="t1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11 12 4l9 7v9H3z"/></svg>Hogar</label>
+            <input type="radio" name="tipo" id="t2" value="mi cafetería o restaurante"><label for="t2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z"/><path d="M17 11h2a2.5 2.5 0 0 1 0 5h-2"/></svg>Negocio</label>
+            <input type="radio" name="tipo" id="t3" value="mi empresa"><label for="t3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5h8v2"/></svg>Empresa</label>
+          </div>
+        </div>
+        <div class="field"><label for="cmsg">Mensaje</label><textarea id="cmsg" rows="4" placeholder="Cuéntenos qué café busca o cuántas personas toman café en su oficina."></textarea></div>
+        <span class="err" id="cerr" role="alert"></span>
+        <a class="btn btn-wa" id="csend" href="https://wa.me/573229214601" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg>Enviar por WhatsApp</a>
+      </form>
+      <div class="info">
+        <div class="info-card spot rv">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3>Tostadora y tienda</h3><span class="open-now" id="openNow">Abierto ahora</span></div>
+          <div class="c-row"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.6L3 21Z"/></svg></div><div><small>WhatsApp</small><span class="mono">+57 322 921 4601</span></div><a class="chipbtn" data-wa="Hola Café Cumbre, quiero más información" href="#">Escribir</a></div>
+          <div class="c-row"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EDB54F" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><small>Correo</small><span>pedidos@cafecumbre.co</span></div><button class="chipbtn copy" data-copy="pedidos@cafecumbre.co">Copiar</button></div>
+          <div class="hours"><div><span>Lunes a viernes</span><span class="mono">8:00 – 18:00</span></div><div><span>Sábado</span><span class="mono">9:00 – 14:00</span></div></div>
+          <div class="socials">
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v7h4v-7h3l1-4h-4V8Z"/></svg></a>
+            <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 3c.3 2.2 1.8 3.8 4 4v3.3a7.5 7.5 0 0 1-4-1.2V15a6 6 0 1 1-6-6v3.4a2.6 2.6 0 1 0 2.6 2.6V3H16Z"/></svg></a>
+          </div>
+        </div>
+        <div class="minimap spot rv">
+          <svg viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" aria-label="Mapa de ubicación">
+            <rect width="600" height="300" fill="#0F2019"/>
+            <g stroke="#1A3227" stroke-width="1"><path d="M0 50H600M0 110H600M0 170H600M0 230H600M70 0V300M170 0V300M290 0V300M410 0V300M520 0V300"/></g>
+            <path d="M-20 240 C120 200 220 270 340 220 S520 160 640 190" stroke="#1F4A60" stroke-width="16" fill="none" opacity=".8"/>
+            <text x="470" y="200" fill="#4C7F96" font-family="JetBrains Mono,monospace" font-size="11">Río Guarapas</text>
+            <g stroke="#2A4A3A" stroke-width="12" stroke-linecap="round" fill="none"><path d="M0 140H600"/><path d="M300 0V300"/><path d="M80 0 L380 300"/></g>
+            <rect x="330" y="40" width="120" height="70" rx="8" fill="#1F4030"/><text x="345" y="80" fill="#86C493" font-family="Instrument Sans,sans-serif" font-size="13">Parque principal</text>
+            <circle cx="300" cy="140" r="16" fill="#E5473D" class="pulse"/>
+            <path d="M300 146 C289 129 280 121 280 108 a20 20 0 0 1 40 0 c0 13 -9 21 -20 38Z" fill="#E5473D"/><circle cx="300" cy="108" r="7" fill="#0B1813"/>
+          </svg>
+          <div class="addr"><div><b>Calle 7 # 4-38</b><br><small style="color:var(--muted)">Pitalito, Huila</small></div><a class="chipbtn" href="https://www.google.com/maps/search/Pitalito+Huila" target="_blank" rel="noopener">Abrir en Google Maps ↗</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="giant" aria-hidden="true">CUMBRE</div>
+    <div class="foot-row"><span>© 2026 Café Cumbre S.A.S. · Pitalito, Huila</span><span>Empresa ficticia creada como muestra de diseño web</span><a href="#inicio" style="text-decoration:none">Volver arriba ↑</a></div>
+  </div>
+</footer>
+
+<a class="wa" id="waFloat" target="_blank" rel="noopener" href="https://wa.me/573229214601" aria-label="Escribir por WhatsApp"><span class="wa-tip">¿Le ayudamos con su pedido?</span><svg width="32" height="32" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.4.1.1.1.7-.1 1.4Z"/></svg></a>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<script>
+const WA='573229214601';
+const waLink=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+
+/* ---------- enlaces de WhatsApp ---------- */
+$('#waFloat').href=waLink('Hola Café Cumbre, quiero más información');
+$$('[data-wa]').forEach(a=>{a.href=waLink(a.dataset.wa);a.target='_blank';a.rel='noopener'});
+setTimeout(()=>{const w=$('#waFloat');w.classList.add('peek');setTimeout(()=>w.classList.remove('peek'),3500)},4000);
+
+/* ---------- navegación ---------- */
+const nav=$('#nav'),burger=$('#burger');
+burger.addEventListener('click',()=>{const o=nav.classList.toggle('open');burger.setAttribute('aria-expanded',o)});
+$$('#menu a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');burger.setAttribute('aria-expanded','false')}));
+const prog=$('#progress');
+const secs=['nosotros','proceso','servicios','fincas','catalogo','contacto'].map(id=>document.getElementById(id));
+function onScroll(){
+  const y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+  prog.style.transform=`scaleX(${h>0?y/h:0})`;
+  nav.classList.toggle('scrolled',y>40);
+  let cur=null;secs.forEach(s=>{if(s.getBoundingClientRect().top<innerHeight*.4)cur=s.id});
+  $$('#menu a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+cur));
+  lightWords();
+}
+addEventListener('scroll',onScroll,{passive:true});
+
+/* ---------- escena del hero (canvas) ---------- */
+(function(){
+  const c=$('#scene'),x=c.getContext('2d');let W,H,mx=0,my=0,tx=0,ty=0,t0=performance.now();
+  const rnd=(s=>()=>(s=(s*16807)%2147483647)/2147483647)(7);
+  const layers=[
+    {col:'#6E6A57',amp:.11,base:.50,f:[1.3,3.1,7.2],d:.15,mist:true},
+    {col:'#47543F',amp:.13,base:.58,f:[1.7,4.3,9.1],d:.3,mist:true},
+    {col:'#2B4335',amp:.12,base:.67,f:[2.1,5.2,11],d:.5,mist:true},
+    {col:'#183126',amp:.10,base:.77,f:[1.4,3.7,8.4],d:.75},
+  ];
+  layers.forEach(l=>l.ph=[rnd()*6,rnd()*6,rnd()*6]);
+  const bushes=Array.from({length:70},(_,i)=>({u:rnd(),row:Math.floor(rnd()*4),s:.7+rnd()*.6,ch:Array.from({length:7},()=>[rnd()*2-1,rnd()*2-1,rnd()<.75])}));
+  const dust=Array.from({length:60},()=>({u:rnd(),v:rnd(),s:.5+rnd()*1.8,sp:.2+rnd()*.6,p:rnd()*6}));
+  function size(){const d=Math.min(devicePixelRatio||1,2);W=c.clientWidth;H=c.clientHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0)}
+  function ridge(l,u){return H*(l.base-l.amp*(.55*Math.sin(u*l.f[0]+l.ph[0])+.3*Math.sin(u*l.f[1]+l.ph[1])+.15*Math.sin(u*l.f[2]+l.ph[2])))}
+  function draw(now){
+    const t=(now-t0)/1000;tx+=(mx-tx)*.05;ty+=(my-ty)*.05;
+    const sc=Math.min(scrollY,H)/H;
+    // cielo de amanecer
+    const g=x.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#0A1712');g.addColorStop(.35,'#1D3A33');g.addColorStop(.58,'#8E6A45');g.addColorStop(.7,'#E8A14A');g.addColorStop(1,'#E8A14A');
+    x.fillStyle=g;x.fillRect(0,0,W,H);
+    // sol
+    const sx=W*.72+tx*-10,sy=H*(.5+sc*.2);
+    const sg=x.createRadialGradient(sx,sy,0,sx,sy,W*.45);
+    sg.addColorStop(0,'rgba(255,214,140,.95)');sg.addColorStop(.06,'rgba(255,190,100,.7)');sg.addColorStop(.25,'rgba(232,120,60,.22)');sg.addColorStop(1,'rgba(232,120,60,0)');
+    x.fillStyle=sg;x.fillRect(0,0,W,H);
+    x.fillStyle='#FFE2A8';x.beginPath();x.arc(sx,sy,Math.max(26,W*.028),0,7);x.fill();
+    // estrellas tenues arriba
+    x.fillStyle='rgba(241,236,224,.5)';for(let i=0;i<40;i++){const u=(i*.6180339)%1,v=((i*.3819)%1)*.28;x.globalAlpha=.25+.25*Math.sin(t*1.5+i);x.fillRect(u*W,v*H,1.4,1.4)}x.globalAlpha=1;
+    // montañas + neblina
+    layers.forEach((l,li)=>{
+      const ox=tx*40*l.d,oy=ty*14*l.d+sc*H*.25*l.d;
+      x.fillStyle=l.col;x.beginPath();x.moveTo(-60,H);
+      for(let px=-60;px<=W+60;px+=8){x.lineTo(px+ox,ridge(l,px/W*3.2)+oy)}
+      x.lineTo(W+60,H);x.closePath();x.fill();
+      if(l.mist){
+        for(let k=0;k<2;k++){
+          const my2=H*(l.base+.04+k*.03)+oy,shift=((t*(8+li*4)+k*300)%(W+600))-300;
+          const mg=x.createRadialGradient(shift,my2,0,shift,my2,W*.35);
+          mg.addColorStop(0,'rgba(241,232,215,.22)');mg.addColorStop(1,'rgba(241,232,215,0)');
+          x.save();x.scale(1,.22);x.fillStyle=mg;x.beginPath();x.arc(shift,my2/.22,W*.35,0,7);x.fill();x.restore();
+        }
+      }
+    });
+    // colina de cafetales
+    const fo=tx*60,foY=ty*18+sc*H*.3;
+    x.fillStyle='#10241B';x.beginPath();x.moveTo(-60,H);
+    const hill=u=>H*(.86-.06*Math.sin(u*2.4+1))+foY;
+    for(let px=-60;px<=W+60;px+=10)x.lineTo(px+fo,hill(px/W));
+    x.lineTo(W+60,H);x.fill();
+    bushes.forEach(b=>{
+      const bx=b.u*(W+120)-60+fo*(1+b.row*.1),by=hill(b.u)+18+b.row*Math.max(16,H*.03),r=Math.max(9,W*.012)*b.s*(1+b.row*.25);
+      const sway=Math.sin(t*1.3+b.u*20)*1.5;
+      x.fillStyle='#0C1D15';x.beginPath();x.ellipse(bx,by+r*.6,r*1.3,r*.35,0,0,7);x.fill();
+      x.fillStyle='#1E4A30';x.beginPath();x.arc(bx+sway,by,r,0,7);x.arc(bx-r*.7+sway,by+r*.2,r*.8,0,7);x.arc(bx+r*.7+sway,by+r*.25,r*.75,0,7);x.fill();
+      x.fillStyle='#2C6640';x.beginPath();x.arc(bx-r*.25+sway,by-r*.35,r*.5,0,7);x.fill();
+      b.ch.forEach(([u,v,red])=>{x.fillStyle=red?'#E5473D':'#C9B54A';x.beginPath();x.arc(bx+u*r*.9+sway,by+v*r*.6,Math.max(1.6,r*.12),0,7);x.fill()});
+    });
+    // polvo dorado
+    dust.forEach(p=>{const px=((p.u*W+t*p.sp*12)%W),py=(p.v*H*.85+Math.sin(t*p.sp+p.p)*12);x.fillStyle=`rgba(255,214,140,${.25+.35*Math.sin(t+p.p)**2})`;x.beginPath();x.arc(px,py,p.s,0,7);x.fill()});
+    if(!reduce&&heroVisible)requestAnimationFrame(draw);
+  }
+  let heroVisible=true;
+  size();draw(t0);
+  addEventListener('resize',()=>{size();if(reduce)draw(performance.now())});
+  new IntersectionObserver(e=>{const v=e[0].isIntersecting;if(v&&!heroVisible&&!reduce){heroVisible=true;requestAnimationFrame(draw)}heroVisible=v}).observe(c);
+  if(fine)addEventListener('mousemove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+  // inclinación de la tarjeta del lote
+  const lot=$('#lot');
+  if(fine&&!reduce){lot.addEventListener('mousemove',e=>{const r=lot.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;lot.style.transform=`perspective(900px) rotateY(${px*12}deg) rotateX(${-py*12}deg)`});lot.addEventListener('mouseleave',()=>lot.style.transform='')}
+})();
+
+/* ---------- contadores ---------- */
+$$('[data-count]').forEach(el=>{
+  if(reduce)return;const end=+el.dataset.count,dec=+(el.dataset.dec||0),final=el.textContent;let s=null;
+  const run=t=>{s??=t;const p=Math.min((t-s)/1600,1),v=end*(1-Math.pow(1-p,4));el.textContent=p<1?v.toFixed(dec).replace('.',','):final;if(p<1)requestAnimationFrame(run)};
+  setTimeout(()=>requestAnimationFrame(run),600)});
+
+/* ---------- manifiesto que se ilumina ---------- */
+const man=$('#manifesto');
+(function(){let hl=false;man.innerHTML=man.textContent.split(/(\s+)/).map(w=>{if(/^\s+$/.test(w))return w;let cls='wd';if(w.startsWith('*'))hl=true;if(hl)cls+=' hl';const end=w.endsWith('*');if(end)setTimeout(()=>{},0);const out=`<span class="${cls}">${w.replace(/\*/g,'')}</span>`;if(end)hl=false;return out}).join('')})();
+const wds=[...man.querySelectorAll('.wd')];
+function lightWords(){const r=man.getBoundingClientRect(),p=(innerHeight*.85-r.top)/(r.height+innerHeight*.35);const n=Math.round(Math.max(0,Math.min(1,p))*wds.length);wds.forEach((w,i)=>w.classList.toggle('lit',i<n))}
+if(reduce)wds.forEach(w=>w.classList.add('lit'));
+
+/* ---------- escenas del proceso ---------- */
+const SC=[
+`<svg viewBox="0 0 400 400"><defs><radialGradient id="ch" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#FF7A6E"/><stop offset=".5" stop-color="#E5473D"/><stop offset="1" stop-color="#8E1F1A"/></radialGradient><radialGradient id="cy" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#F3E27A"/><stop offset="1" stop-color="#9AA036"/></radialGradient><linearGradient id="lf" x1="0" x2="1"><stop offset="0" stop-color="#2F7A4A"/><stop offset="1" stop-color="#1D5534"/></linearGradient></defs>
+<circle cx="200" cy="210" r="150" fill="#EDB54F" opacity=".08"/>
+<g class="sway"><path d="M30 60 C120 110 220 150 380 300" stroke="#5B3A24" stroke-width="12" fill="none" stroke-linecap="round"/>
+${[[90,92,-30,1],[150,118,25,-1],[210,150,-35,1],[270,200,30,-1],[320,248,-25,1],[120,100,60,-1],[245,175,-70,1]].map(([x,y,r,s])=>`<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 0 C30 ${-26*s} 80 ${-26*s} 110 0 C80 ${26*s*.4} 30 ${20*s} 0 0Z" fill="url(#lf)"/><path d="M4 0 L104 0" stroke="#86C493" stroke-width="1.2" opacity=".6"/></g>`).join('')}
+${[[175,165],[195,175],[185,192],[205,195],[165,185],[215,178],[230,200],[195,212],[245,215],[175,205],[260,232],[280,244],[265,252]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="13" fill="url(#${i%5===3?'cy':'ch'})"/><circle cx="${x-4}" cy="${y-5}" r="3" fill="#fff" opacity=".45"/>`).join('')}</g>
+<text x="200" y="350" text-anchor="middle" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="12">Cereza madura · 18–22 °Brix</text></svg>`,
+`<svg viewBox="0 0 400 400"><circle cx="200" cy="195" r="140" fill="#B32F28"/><circle cx="200" cy="195" r="126" fill="#E5473D"/><circle cx="200" cy="195" r="104" fill="#F49A80"/><circle cx="200" cy="195" r="86" fill="#F6E7C1" opacity=".9"/>
+<g><ellipse cx="172" cy="195" rx="34" ry="62" fill="#D8CF9A" stroke="#B8AE72" stroke-width="3"/><ellipse cx="228" cy="195" rx="34" ry="62" fill="#D8CF9A" stroke="#B8AE72" stroke-width="3"/><path d="M196 140 C188 175 204 215 196 250" stroke="#8C8350" stroke-width="3" fill="none"/><path d="M204 140 C212 175 196 215 204 250" stroke="#8C8350" stroke-width="3" fill="none"/></g>
+<g font-family="JetBrains Mono,monospace" font-size="11" fill="#F1ECE0"><path d="M330 110 L380 80" stroke="#F1ECE0"/><text x="334" y="72">Cáscara</text><path d="M298 170 L372 150" stroke="#F1ECE0"/><text x="318" y="142">Pulpa</text><path d="M60 280 L118 250" stroke="#F1ECE0"/><text x="16" y="298">Mucílago</text><path d="M60 120 L140 160" stroke="#F1ECE0"/><text x="14" y="112">Pergamino</text><path d="M228 195 L300 300" stroke="#F1ECE0"/><text x="272" y="318">Grano</text></g>
+<text x="200" y="370" text-anchor="middle" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="12">Corte de una cereza</text></svg>`,
+`<svg viewBox="0 0 400 400"><defs><linearGradient id="liq" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E9C77A" stop-opacity=".55"/><stop offset="1" stop-color="#9C7A3A" stop-opacity=".85"/></linearGradient></defs>
+<rect x="90" y="70" width="190" height="260" rx="22" fill="#1A3227" stroke="#36594A" stroke-width="4"/><rect x="96" y="140" width="178" height="184" rx="18" fill="url(#liq)"/>
+${Array.from({length:40},(_,i)=>`<ellipse cx="${108+(i*37)%160}" cy="${300-Math.floor(i/10)*12}" rx="8" ry="11" fill="#CDBF84" stroke="#8C8350" transform="rotate(${i*41} ${108+(i*37)%160} ${300-Math.floor(i/10)*12})"/>`).join('')}
+${Array.from({length:12},(_,i)=>`<circle class="bub" style="animation-delay:${(i*.27).toFixed(2)}s" cx="${115+(i*29)%145}" cy="290" r="${3+i%4}" fill="none" stroke="#F6E7C1" stroke-width="1.5"/>`).join('')}
+<g font-family="JetBrains Mono,monospace"><rect x="296" y="110" width="84" height="56" rx="10" fill="#0B1813" stroke="#36594A"/><text x="338" y="134" text-anchor="middle" fill="#A6B3A8" font-size="10">pH</text><text x="338" y="156" text-anchor="middle" fill="#EDB54F" font-size="18" font-weight="600">4,2</text>
+<rect x="296" y="180" width="84" height="56" rx="10" fill="#0B1813" stroke="#36594A"/><text x="338" y="204" text-anchor="middle" fill="#A6B3A8" font-size="10">TIEMPO</text><text x="338" y="226" text-anchor="middle" fill="#86C493" font-size="18" font-weight="600">36 h</text></g>
+<text x="185" y="370" text-anchor="middle" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="12">Tanque de fermentación</text></svg>`,
+`<svg viewBox="0 0 400 400"><g class="rays">${Array.from({length:12},(_,i)=>`<path d="M320 80 L${320+Math.cos(i*.5236)*70} ${80+Math.sin(i*.5236)*70}" stroke="#EDB54F" stroke-width="3" stroke-linecap="round" opacity=".6"/>`).join('')}</g><circle cx="320" cy="80" r="30" fill="#EDB54F"/>
+<path d="M40 170 L300 170 L360 210 L100 210Z" fill="#E9E1C8" opacity=".14"/><path d="M40 170 L300 170 L360 210 L100 210Z" fill="none" stroke="#F6E7C1" stroke-opacity=".4" stroke-width="2"/>
+<path d="M60 215 L370 215 L340 262 L30 262Z" fill="#5B3A24"/><path d="M60 215 L370 215 L340 262 L30 262Z" fill="none" stroke="#7A5234" stroke-width="2"/>
+${Array.from({length:90},(_,i)=>{const u=(i*.618)%1,v=((i*.382)%1);const xx=40+u*300+v*12,yy=220+v*38;return `<ellipse cx="${xx.toFixed(1)}" cy="${yy.toFixed(1)}" rx="4" ry="5.5" fill="${i%7?'#CDBF84':'#B8A766'}" transform="rotate(${i*33} ${xx.toFixed(1)} ${yy.toFixed(1)})"/>`}).join('')}
+<path d="M60 262 L60 320 M340 262 L340 320 M200 262 L200 320" stroke="#5B3A24" stroke-width="6"/>
+<g font-family="JetBrains Mono,monospace"><text x="40" y="70" fill="#A6B3A8" font-size="11">HUMEDAD DEL GRANO</text><rect x="40" y="80" width="200" height="14" rx="7" fill="#0B1813" stroke="#36594A"/><rect class="hum" x="40" y="80" width="42" height="14" rx="7" fill="#86C493"/><text x="40" y="118" fill="#86C493" font-size="16" font-weight="600">53% → 11%</text></g>
+<text x="200" y="365" text-anchor="middle" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="12">Cama elevada en marquesina</text></svg>`,
+`<svg viewBox="0 0 400 400"><g font-family="JetBrains Mono,monospace" font-size="10" fill="#A6B3A8">
+<g stroke="#274233">${[98.6,195,291.4].map(y=>`<line x1="60" x2="370" y1="${y}" y2="${y}"/>`).join('')}${[60,137.5,215,292.5,370].map(x=>`<line y1="70" y2="330" x1="${x}" x2="${x}"/>`).join('')}</g>
+<text x="52" y="102" text-anchor="end">200°</text><text x="52" y="198" text-anchor="end">150°</text><text x="52" y="295" text-anchor="end">100°</text>
+${[0,3,6,9,12].map((m,i)=>`<text x="${60+i*77.5}" y="348" text-anchor="middle">${m} min</text>`).join('')}</g>
+<path d="M60 98.6 L72.9 214.3 L85.8 281.8 L98.75 301.1 L137.5 243.2 L189.2 185.4 L240.8 146.8 L292.5 117.9 L309.8 106.3 L344.2 96.6 L370 88.9 L370 330 L60 330Z" fill="#EDB54F" opacity=".08"/>
+<path class="curve" d="M60 98.6 L72.9 214.3 L85.8 281.8 L98.75 301.1 L137.5 243.2 L189.2 185.4 L240.8 146.8 L292.5 117.9 L309.8 106.3 L344.2 96.6 L370 88.9" fill="none" stroke="#EDB54F" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="98.75" cy="301.1" r="5" fill="#86C493"/><text x="108" y="318" fill="#86C493" font-family="JetBrains Mono,monospace" font-size="10">Punto de retorno 95°</text>
+<circle cx="309.8" cy="106.3" r="6" fill="#E5473D"/><text x="300" y="138" text-anchor="end" fill="#F1ECE0" font-family="JetBrains Mono,monospace" font-size="10">Primer crack · 9:40 · 196°</text>
+<circle cx="370" cy="88.9" r="6" fill="#F1ECE0"/><text x="366" y="74" text-anchor="end" fill="#F1ECE0" font-family="JetBrains Mono,monospace" font-size="10">Fin 12:00 · 205°</text>
+<text x="215" y="378" text-anchor="middle" fill="#A6B3A8" font-family="JetBrains Mono,monospace" font-size="12">Curva de tueste · lote Esperanza</text></svg>`
+];
+const NAMES=['Cosecha','Despulpado','Fermentación','Secado','Tueste'];
+const stage=$('#stage');
+SC.forEach((s,i)=>{const d=document.createElement('div');d.className='scn'+(i===0?' on':'');d.innerHTML=s.replace(/id="(\w+)"/g,'id="s$1"').replace(/url\(#(\w+)\)/g,'url(#s$1)');stage.appendChild(d)});
+$$('.step .mini').forEach((m,i)=>m.innerHTML=SC[i].replace(/id="(\w+)"/g,'id="m$1"').replace(/url\(#(\w+)\)/g,'url(#m$1)'));
+const scns=[...stage.querySelectorAll('.scn')],steps=$$('.step');
+function setStep(i){scns.forEach((s,k)=>s.classList.toggle('on',k===i));steps.forEach((s,k)=>s.classList.toggle('on',k===i));$('#stageN').textContent=`0${i+1} / 05`;$('#stageT').textContent=NAMES[i];$('#stageBar').style.width=((i+1)*20)+'%'}
+const stepObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)setStep(+e.target.dataset.i)}),{rootMargin:'-48% 0px -48% 0px'});
+steps.forEach(s=>stepObs.observe(s));
+
+/* ---------- mapa topográfico de fincas ---------- */
+const FARMS=[
+ {n:'La Esperanza',f:'Familia Ramírez',v:'Bruselas',a:1950,var:'Geisha',ha:6,since:2014,x:418,y:150,notes:'Jazmín, durazno, té negro'},
+ {n:'Villa Luz',f:'Familia Gómez',v:'Bruselas',a:1880,var:'Pink Bourbon',ha:3,since:2019,x:470,y:205,notes:'Fresa, vino tinto, cacao'},
+ {n:'Los Naranjos',f:'Familia Muñoz',v:'Regueros',a:1800,var:'Castillo',ha:8,since:2016,x:205,y:240,notes:'Frutos rojos, caramelo'},
+ {n:'El Mirador',f:'Familia Ortiz',v:'Charguayaco',a:1720,var:'Caturra',ha:4,since:2017,x:300,y:300,notes:'Panela, chocolate, naranja'},
+ {n:'San Isidro',f:'Familia Quintero',v:'Palmarito',a:1650,var:'Colombia',ha:5,since:2020,x:120,y:340,notes:'Cacao, nuez, cuerpo alto'},
+];
+(function(){
+  const svg=$('#topo');let s='<defs><radialGradient id="tg" cx=".65" cy=".35" r=".8"><stop offset="0" stop-color="#2A4A38"/><stop offset="1" stop-color="#0D1C15"/></radialGradient></defs><rect width="640" height="440" fill="url(#tg)"/>';
+  const peaks=[{x:430,y:165,n:9,st:24,ph:.4},{x:205,y:245,n:6,st:22,ph:2.1}];
+  peaks.forEach((p,pi)=>{for(let k=p.n;k>=1;k--){let d='';for(let a=0;a<=72;a++){const th=a/72*Math.PI*2,r=p.st*k*(1+.14*Math.sin(3*th+p.ph+k*.2)+.08*Math.sin(5*th+p.ph*2)+.05*Math.sin(2*th+k));d+=(a?'L':'M')+(p.x+Math.cos(th)*r*1.15).toFixed(1)+' '+(p.y+Math.sin(th)*r*.85).toFixed(1)}
+    const lvl=1-k/p.n;s+=`<path d="${d}Z" fill="rgba(237,181,79,${(.012+lvl*.035).toFixed(3)})" stroke="${k%3===0?'rgba(237,181,79,.45)':'rgba(134,196,147,.22)'}" stroke-width="${k%3===0?1.4:.9}"/>`;
+    if(k%3===0&&pi===0)s+=`<text x="${p.x+p.st*k*1.15+4}" y="${p.y+4}" fill="rgba(237,181,79,.7)" font-family="JetBrains Mono,monospace" font-size="9">${(1950-k*40).toLocaleString('es-CO')} m</text>`}});
+  s+='<path d="M-10 410 C100 380 160 400 240 370 S420 330 520 360 S600 420 660 400" stroke="#2C6680" stroke-width="5" fill="none" opacity=".8"/><text x="520" y="395" fill="#4C8AA6" font-family="JetBrains Mono,monospace" font-size="10">Río Guarapas</text>';
+  s+='<g><rect x="30" y="390" width="62" height="20" rx="4" fill="#F1ECE0"/><text x="61" y="404" text-anchor="middle" fill="#0B1813" font-family="Instrument Sans,sans-serif" font-size="11" font-weight="600">Pitalito</text></g>';
+  s+='<g font-family="JetBrains Mono,monospace" font-size="9" fill="#A6B3A8"><path d="M590 30 L590 60 M584 40 L590 30 L596 40" stroke="#A6B3A8" fill="none"/><text x="590" y="74" text-anchor="middle">N</text><path d="M520 418 L600 418" stroke="#A6B3A8"/><text x="560" y="432" text-anchor="middle">2 km</text></g>';
+  FARMS.forEach((f,i)=>{s+=`<g class="farm-pin" data-i="${i}" tabindex="0" role="button" aria-label="${f.n}"><circle class="halo" cx="${f.x}" cy="${f.y}" r="10" fill="none" stroke="#EDB54F" stroke-width="2"/><circle class="core" cx="${f.x}" cy="${f.y}" r="8" fill="#E5473D" stroke="#F1ECE0" stroke-width="2.5"/><text x="${f.x+14}" y="${f.y+4}" fill="#F1ECE0" font-family="Instrument Sans,sans-serif" font-size="12" font-weight="600">${f.n}</text></g>`});
+  svg.innerHTML=s;
+  const card=$('#farmCard');
+  function show(i){const f=FARMS[i];$$('.farm-pin').forEach(p=>p.classList.toggle('on',+p.dataset.i===i));
+    card.innerHTML=`<span class="eyebrow">Finca aliada desde ${f.since}</span><div class="fam">${f.n}</div><span style="color:var(--muted)">${f.f} · Vereda ${f.v}</span>
+    <div style="display:grid;gap:6px"><div style="display:flex;justify-content:space-between;font-size:.82rem"><span style="color:var(--muted)">Altura</span><b class="mono">${f.a.toLocaleString('es-CO')} msnm</b></div><div class="alt-meter"><i style="width:${((f.a-1500)/500*100).toFixed(0)}%"></i></div></div>
+    <dl class="kv"><dt>Variedad</dt><dd>${f.var}</dd><dt>Área</dt><dd>${f.ha} hectáreas</dd><dt>Sabor</dt><dd>${f.notes}</dd></dl>
+    <div class="farm-list" role="group" aria-label="Fincas">${FARMS.map((g,k)=>`<button aria-pressed="${k===i}" data-f="${k}">${g.n}</button>`).join('')}</div>`;}
+  show(0);
+  svg.addEventListener('click',e=>{const p=e.target.closest('.farm-pin');if(p)show(+p.dataset.i)});
+  svg.addEventListener('keydown',e=>{const p=e.target.closest('.farm-pin');if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();show(+p.dataset.i)}});
+  card.addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b)show(+b.dataset.f)});
+})();
+
+/* ---------- rueda de sabores + catálogo ---------- */
+const FLAV=[{k:'frutal',n:'Frutal',c:'#E5473D'},{k:'floral',n:'Floral',c:'#B98AD0'},{k:'citrico',n:'Cítrico',c:'#F0CF5A'},{k:'dulce',n:'Dulce',c:'#EDB54F'},{k:'nuez',n:'Nuez',c:'#C49264'},{k:'chocolate',n:'Chocolate',c:'#8A5432'}];
+const FC=Object.fromEntries(FLAV.map(f=>[f.k,f.c]));
+const P=[
+ {id:'esp',n:'Finca La Esperanza',v:'Geisha · Lavado',alt:'1.950',sca:'88',roast:1,badge:'Lote del mes',notes:[['Jazmín','floral'],['Durazno','frutal'],['Té negro','floral']],c:'#EDB54F',p:[48000,89000,410000]},
+ {id:'bru',n:'Bruselas Clásico',v:'Caturra · Lavado',alt:'1.650',sca:'85',roast:3,notes:[['Panela','dulce'],['Chocolate','chocolate'],['Naranja','citrico']],c:'#E5473D',p:[28000,52000,235000]},
+ {id:'mie',n:'Miel Roja',v:'Castillo · Honey',alt:'1.800',sca:'86,5',roast:2,notes:[['Frutos rojos','frutal'],['Caramelo','dulce']],c:'#B32F28',p:[34000,63000,290000]},
+ {id:'mad',n:'Madrugada',v:'Mezcla de la casa',alt:'1.600',sca:'84',roast:5,badge:'Más vendido',notes:[['Cacao','chocolate'],['Nuez','nuez'],['Cuerpo alto','chocolate']],c:'#6B4128',p:[24000,44000,198000]},
+ {id:'esc',n:'Espresso Cumbre',v:'Para máquina',alt:'1.700',sca:'84,5',roast:4,notes:[['Chocolate amargo','chocolate'],['Avellana','nuez'],['Panela','dulce']],c:'#2E5A43',p:[26000,48000,215000]},
+ {id:'ana',n:'Anaeróbico 72 h',v:'Pink Bourbon · Anaeróbico',alt:'1.880',sca:'89',roast:1,badge:'Edición limitada',notes:[['Fresa','frutal'],['Mandarina','citrico'],['Cacao nibs','chocolate']],c:'#B98AD0',p:[55000,102000,470000]},
+];
+const SZ=['250 g','500 g','2,5 kg'],sel={};P.forEach(p=>sel[p.id]=0);
+let filt=null;
+(function(){
+  const w=$('#wheel'),cx=160,cy=160,R=150,r=62;let s='';
+  const pt=(a,rad)=>[cx+Math.cos(a)*rad,cy+Math.sin(a)*rad];
+  FLAV.forEach((f,i)=>{const a0=-Math.PI/2+i*Math.PI/3+.02,a1=a0+Math.PI/3-.04,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R),[x2,y2]=pt(a1,r),[x3,y3]=pt(a0,r),am=(a0+a1)/2,[lx,ly]=pt(am,(R+r)/2);
+    s+=`<g class="seg" data-k="${f.k}" tabindex="0" role="button" aria-pressed="false" aria-label="${f.n}"><path d="M${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r} ${r} 0 0 0 ${x3} ${y3}Z" fill="${f.c}"/><text x="${lx}" y="${ly+4}" text-anchor="middle" fill="${['citrico','dulce'].includes(f.k)?'#1B1408':'#fff'}">${f.n}</text></g>`});
+  s+=`<circle cx="160" cy="160" r="54" fill="#12241C" stroke="#274233"/><text id="wc1" x="160" y="156" text-anchor="middle" fill="#F1ECE0" style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800">6</text><text id="wc2" x="160" y="176" text-anchor="middle" fill="#A6B3A8" style="font-size:11px;font-weight:400">cafés</text>`;
+  w.innerHTML=s;
+  const pick=k=>{filt=filt===k?null:k;w.classList.toggle('filtering',!!filt);w.querySelectorAll('.seg').forEach(g=>{const on=g.dataset.k===filt;g.classList.toggle('on',on);g.setAttribute('aria-pressed',on)});render()};
+  w.addEventListener('click',e=>{const g=e.target.closest('.seg');if(g)pick(g.dataset.k)});
+  w.addEventListener('keydown',e=>{const g=e.target.closest('.seg');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.k)}});
+  window.clearFilter=()=>{if(filt)pick(filt)};
+})();
+const bagSVG=(p)=>`<svg class="bag" viewBox="0 0 140 190" aria-hidden="true"><defs><linearGradient id="bg-${p.id}" x1="0" x2="1"><stop offset="0" stop-color="${p.c}"/><stop offset=".55" stop-color="${p.c}"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient><linearGradient id="sh-${p.id}" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<path d="M22 34 L118 34 L128 176 Q70 186 12 176Z" fill="url(#bg-${p.id})"/><path d="M22 34 L32 10 L108 10 L118 34Z" fill="${p.c}"/><path d="M22 34 L32 10 L108 10 L118 34Z" fill="#000" opacity=".2"/><path d="M34 14 L106 14" stroke="#0B1813" stroke-width="3" stroke-dasharray="5 3" opacity=".6"/>
+<rect x="32" y="64" width="76" height="80" rx="8" fill="#F6EEDB"/><path d="M42 126 L58 98 L67 112 L75 101 L98 126Z" fill="${p.c}"/><ellipse cx="70" cy="122" rx="8" ry="5.5" fill="#E5473D"/>
+<text x="70" y="84" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="11" font-weight="800" fill="#0B1813">CUMBRE</text><text x="70" y="138" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="5.6" fill="#0B1813">${p.n.toUpperCase().slice(0,20)}</text>
+<circle cx="70" cy="50" r="5" fill="#0B1813" opacity=".35"/><rect x="40" y="34" width="22" height="146" fill="url(#sh-${p.id})"/></svg>`;
+const grid=$('#products');
+function render(){
+  const list=P.filter(p=>!filt||p.notes.some(n=>n[1]===filt));
+  $('#wc1').textContent=list.length;$('#wc2').textContent=list.length===1?'café':'cafés';
+  $('#wheelHint').innerHTML=filt?`Cafés con notas de <b style="color:var(--fg)">${FLAV.find(f=>f.k===filt).n.toLowerCase()}</b> · <button class="clear" onclick="clearFilter()">Ver todos</button>`:'Mostrando todos los cafés';
+  grid.innerHTML=list.map(p=>`<article class="prod spot">
+    <div class="bag-wrap" style="background:radial-gradient(circle at 50% 55%,${p.c}38,transparent 68%)">${p.badge?`<span class="badge">${p.badge}</span>`:''}<span class="sca">SCA ${p.sca}</span>${bagSVG(p)}</div>
+    <div class="prod-body"><h3>${p.n}</h3><span class="sub">${p.v} · ▲ ${p.alt} msnm</span>
+    <div class="roastm">Tueste <i>${[1,2,3,4,5].map(k=>`<b style="${k<=p.roast?`background:hsl(${30-k*4} ${60-k*6}% ${62-k*9}%)`:''}"></b>`).join('')}</i>${['Claro','Medio-claro','Medio','Medio-oscuro','Oscuro'][p.roast-1]}</div>
+    <div class="notes">${p.notes.map(([n,k])=>`<span style="--c:${FC[k]}">${n}</span>`).join('')}</div>
+    <div class="sizes" role="group" aria-label="Presentación">${SZ.map((s,i)=>`<button aria-pressed="${sel[p.id]===i}" data-id="${p.id}" data-i="${i}">${s}</button>`).join('')}</div>
+    <div class="prod-foot"><span class="price" id="pr-${p.id}">${fmt(p.p[sel[p.id]])}<small>${SZ[sel[p.id]]} · grano o molido</small></span><button class="add" data-add="${p.id}" aria-label="Agregar ${p.n} al pedido">+</button></div></div></article>`).join('')||'<div class="noresults">No hay cafés con ese sabor.</div>';
+  bindSpots();
+}
+grid.addEventListener('click',e=>{
+  const s=e.target.closest('.sizes button');
+  if(s){const id=s.dataset.id;sel[id]=+s.dataset.i;s.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===s));const p=P.find(x=>x.id===id);$('#pr-'+id).innerHTML=`${fmt(p.p[sel[id]])}<small>${SZ[sel[id]]} · grano o molido</small>`;return}
+  const a=e.target.closest('[data-add]');
+  if(a){const p=P.find(x=>x.id===a.dataset.add),k=p.id+sel[p.id],it=order.find(o=>o.k===k);it?it.q++:order.push({k,n:p.n,s:SZ[sel[p.id]],pr:p.p[sel[p.id]],q:1});fly(a);drawOrder()}
+});
+function fly(from){
+  if(reduce)return;const a=from.getBoundingClientRect(),b=$('#total').getBoundingClientRect();
+  if(b.bottom<0||b.top>innerHeight)return;
+  const d=document.createElement('div');d.className='flybean';document.body.appendChild(d);
+  const sx=a.left+a.width/2,sy=a.top+a.height/2,ex=b.left+b.width/2,ey=b.top+b.height/2;
+  d.animate([{transform:`translate(${sx}px,${sy}px) rotate(0)`},{transform:`translate(${(sx+ex)/2}px,${Math.min(sy,ey)-120}px) rotate(200deg) scale(1.3)`},{transform:`translate(${ex}px,${ey}px) rotate(400deg) scale(.4)`,opacity:.3}],{duration:800,easing:'cubic-bezier(.5,0,.5,1)'}).onfinish=()=>{d.remove();$('#total').animate([{transform:'scale(1.25)',color:'#EDB54F'},{transform:'scale(1)'}],{duration:400})};
+}
+let order=[{k:'bru0',n:'Bruselas Clásico',s:'250 g',pr:28000,q:2},{k:'esp0',n:'Finca La Esperanza',s:'250 g',pr:48000,q:1}];
+const subs=$('#subs');subs.addEventListener('change',drawOrder);
+function totals(){const st=order.reduce((s,o)=>s+o.pr*o.q,0),dc=subs.checked?st*.1:0,ship=st>=120000||!st?0:9000;return{st,dc,ship,t:st-dc+ship}}
+function orderText(){const T=totals();return 'Hola Café Cumbre, quiero hacer este pedido:\n'+order.map(o=>`• ${o.q} × ${o.n} (${o.s}) = ${fmt(o.pr*o.q)}`).join('\n')+(subs.checked?'\nCon suscripción mensual (-10%)':'')+`\nEnvío: ${T.ship?fmt(T.ship):'gratis'}\nTotal: ${fmt(T.t)}`}
+function drawOrder(){
+  $('#orderList').innerHTML=order.map((o,i)=>`<li><div>${o.n}<br><small>${o.s} · ${fmt(o.pr)} c/u</small></div><span class="mono">${fmt(o.pr*o.q)}</span><div class="qty"><button data-q="-1" data-i="${i}" aria-label="Quitar uno">−</button><span class="mono">${o.q}</span><button data-q="1" data-i="${i}" aria-label="Agregar uno">+</button></div></li>`).join('');
+  $('#empty').hidden=order.length>0;const T=totals();
+  $('#count').textContent=order.reduce((s,o)=>s+o.q,0);
+  $('#subtotal').textContent=fmt(T.st);$('#discRow').hidden=!subs.checked;$('#disc').textContent='-'+fmt(T.dc);
+  $('#shipCost').textContent=T.ship?fmt(T.ship):'Gratis';$('#total').textContent=fmt(T.t);
+  $('#shipBar').style.width=Math.min(100,T.st/120000*100)+'%';
+  $('#shipT').textContent=T.st>=120000?'✓ Su pedido tiene envío gratis':`Le faltan ${fmt(120000-T.st)} para envío gratis`;
+  $('#sendOrder').href=waLink(order.length?orderText():'Hola Café Cumbre, quiero hacer un pedido');
+}
+$('#orderList').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;const o=order[+b.dataset.i];o.q+=+b.dataset.q;if(o.q<1)order.splice(+b.dataset.i,1);drawOrder()});
+$('#sendOrder').addEventListener('click',e=>{if(!order.length){e.preventDefault();$('#toast').textContent='Su pedido está vacío.'}else{$('#sendOrder').href=waLink(orderText());$('#toast').textContent='Abriendo WhatsApp…'}setTimeout(()=>$('#toast').textContent='',3000)});
+
+/* ---------- clientes y testimonios ---------- */
+const LG=[['lg1','Hotel Arrayán'],['lg2','Tostao·Barra'],['lg3','ceiba.'],['lg4','Mercado Vivo'],['lg5','La Molienda'],['lg6','Casa Neiva'],['lg2','Coop. Bruselas'],['lg3','NORTE/SUR']];
+$('#logos').innerHTML=[...LG,...LG].map(([c,n])=>`<span class="lg ${c}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 6c-3 3 3 9 0 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>${n}</span>`).join('');
+const T=[
+ {q:'Cambiamos de proveedor hace dos años y nuestros clientes notaron la diferencia desde la primera semana. Las ventas de espresso subieron un 30%.',n:'Andrea Polanía',r:'Gerente, Tostao Barra',c:'#EDB54F'},
+ {q:'Los kits con nuestro logo fueron el regalo de fin de año más comentado por todo el equipo. Puntuales y muy bien presentados.',n:'Camilo Vargas',r:'Talento humano, Grupo Ceiba',c:'#86C493'},
+ {q:'Siempre llega fresco, con la fecha de tueste en la bolsa. Se nota el cariño en cada detalle y responden rapidísimo por WhatsApp.',n:'Lucía Medina',r:'Cliente con suscripción desde 2021',c:'#B98AD0'},
+];
+$('#slides').innerHTML=T.map((t,i)=>`<figure class="slide${i?'':' on'}" style="margin:0"><q>${t.q}</q><figcaption class="who"><span class="av" style="background:${t.c}">${t.n[0]}</span><span><b>${t.n}</b>${t.r}</span></figcaption></figure>`).join('');
+$('#dots').innerHTML=T.map((_,i)=>`<button role="tab" aria-label="Testimonio ${i+1}" aria-current="${!i}"></button>`).join('');
+let si=0,sTimer;const goS=i=>{si=i;$$('.slide').forEach((s,k)=>s.classList.toggle('on',k===i));$$('#dots button').forEach((d,k)=>d.setAttribute('aria-current',k===i))};
+const auto=()=>{clearInterval(sTimer);if(!reduce)sTimer=setInterval(()=>goS((si+1)%T.length),6000)};
+$('#dots').addEventListener('click',e=>{const b=e.target.closest('button');if(b){goS([...b.parentNode.children].indexOf(b));auto()}});
+$('#slider').addEventListener('mouseenter',()=>clearInterval(sTimer));$('#slider').addEventListener('mouseleave',auto);auto();
+
+/* ---------- formulario de contacto → WhatsApp ---------- */
+const cs=$('#csend');
+function cMsg(){const n=$('#cname').value.trim(),t=document.querySelector('[name=tipo]:checked').value,m=$('#cmsg').value.trim();return `Hola Café Cumbre, soy ${n||'(nombre)'}. Busco café para ${t}.`+(m?`\n${m}`:'')}
+['input','change'].forEach(ev=>$('#cform').addEventListener(ev,()=>{cs.href=waLink(cMsg());if($('#cname').value.trim())$('#cerr').textContent=''}));
+cs.href=waLink(cMsg());
+cs.addEventListener('click',e=>{if(!$('#cname').value.trim()){e.preventDefault();$('#cerr').textContent='Escriba su nombre para poder saludarle.';$('#cname').focus()}});
+$('#cform').addEventListener('submit',e=>e.preventDefault());
+$$('.copy').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='¡Copiado!'}catch(_){b.textContent='Selecciónelo'}setTimeout(()=>b.textContent='Copiar',1800)}));
+(function(){const d=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Bogota'})),h=d.getHours()+d.getMinutes()/60,w=d.getDay(),open=(w>=1&&w<=5&&h>=8&&h<18)||(w===6&&h>=9&&h<14);const el=$('#openNow');el.textContent=open?'Abierto ahora':'Cerrado ahora';if(!open)el.style.color='var(--muted)'})();
+
+/* ---------- efectos: foco de luz, botones magnéticos, cursor, revelado ---------- */
+function bindSpots(){$$('.spot').forEach(el=>{if(el._sp)return;el._sp=1;el.addEventListener('pointermove',e=>{const r=el.getBoundingClientRect();el.style.setProperty('--mx',e.clientX-r.left+'px');el.style.setProperty('--my',e.clientY-r.top+'px')})})}
+bindSpots();
+if(fine&&!reduce){
+  $$('.mag').forEach(b=>{b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.35}px)`});b.addEventListener('mouseleave',()=>b.style.transform='')});
+  const cur=$('#cursor');let cx=0,cy=0,px=0,py=0;
+  addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;cur.style.opacity=1});
+  document.addEventListener('mouseleave',()=>cur.style.opacity=0);
+  document.addEventListener('mouseover',e=>cur.classList.toggle('big',!!e.target.closest('a,button,.seg,.farm-pin,label')));
+  (function loop(){px+=(cx-px)*.2;py+=(cy-py)*.2;cur.style.transform=`translate(${px}px,${py}px)`;requestAnimationFrame(loop)})();
+}
+if(!reduce&&'IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('pre');io.unobserve(e.target)}}),{rootMargin:'0px 0px -6% 0px'});
+  $$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight){el.classList.add('pre');io.observe(el)}});
+}
+render();drawOrder();onScroll();
+</script>
+
+</body>
+</html>
