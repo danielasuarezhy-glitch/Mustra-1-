@@ -207,6 +207,13 @@ header.nav.scrolled{background:color-mix(in srgb,var(--bg) 78%,transparent);back
 .wheel.filtering .seg:not(.on){opacity:.3}
 .wheel text{pointer-events:none;font-family:var(--body);font-weight:600;font-size:12px}
 .wheel-hint{font-size:.82rem;color:var(--muted);text-align:center}
+.wheel .seg{outline:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.wheel .seg:focus-visible path{stroke:#F1ECE0;stroke-width:3}
+.wheel .seg.on path{stroke:#F1ECE0;stroke-width:2.5}
+.fchips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:340px}
+.fchips button{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:var(--surface);color:var(--fg);font:500 .85rem var(--body);padding:9px 14px;border-radius:999px;cursor:pointer;touch-action:manipulation;transition:background .2s,border-color .2s}
+.fchips button i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.fchips button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .clear{background:none;border:0;color:var(--honey);font:600 .85rem var(--body);cursor:pointer;text-decoration:underline}
 .cat-layout{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:start}
 .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
@@ -507,6 +514,7 @@ body{margin:0}
       <div class="sec-head rv" style="margin:0"><span class="eyebrow">Catálogo y precios</span><h2>Encuentre su café <span class="grad">por sabor.</span></h2><p>Toque un sabor en la rueda para ver los cafés que lo tienen. Elija la presentación y arme su pedido: se lo enviamos por WhatsApp. Precios en pesos colombianos, IVA incluido.</p></div>
       <div class="wheel-box rv">
         <svg class="wheel" id="wheel" viewBox="0 0 320 320" role="group" aria-label="Rueda de sabores"></svg>
+        <div class="fchips" id="fchips" role="group" aria-label="Filtrar por sabor"></div>
         <div class="wheel-hint" id="wheelHint">Mostrando todos los cafés</div>
       </div>
     </div>
@@ -814,8 +822,10 @@ let filt=null;
     s+=`<g class="seg" data-k="${f.k}" tabindex="0" role="button" aria-pressed="false" aria-label="${f.n}"><path d="M${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r} ${r} 0 0 0 ${x3} ${y3}Z" fill="${f.c}"/><text x="${lx}" y="${ly+4}" text-anchor="middle" fill="${['citrico','dulce'].includes(f.k)?'#1B1408':'#fff'}">${f.n}</text></g>`});
   s+=`<circle cx="160" cy="160" r="54" fill="#12241C" stroke="#274233"/><text id="wc1" x="160" y="156" text-anchor="middle" fill="#F1ECE0" style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800">6</text><text id="wc2" x="160" y="176" text-anchor="middle" fill="#A6B3A8" style="font-size:11px;font-weight:400">cafés</text>`;
   w.innerHTML=s;
-  const pick=k=>{filt=filt===k?null:k;w.classList.toggle('filtering',!!filt);w.querySelectorAll('.seg').forEach(g=>{const on=g.dataset.k===filt;g.classList.toggle('on',on);g.setAttribute('aria-pressed',on)});render()};
-  w.addEventListener('click',e=>{const g=e.target.closest('.seg');if(g)pick(g.dataset.k)});
+  const pick=k=>{filt=filt===k?null:k;w.classList.toggle('filtering',!!filt);w.querySelectorAll('.seg').forEach(g=>{const on=g.dataset.k===filt;g.classList.toggle('on',on);g.setAttribute('aria-pressed',on)});$$('#fchips button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===filt));render()};
+  w.querySelectorAll('.seg').forEach(g=>g.addEventListener('click',()=>pick(g.dataset.k)));
+  const fc=$('#fchips');fc.innerHTML=FLAV.map(f=>`<button type="button" data-k="${f.k}" aria-pressed="false" style="--c:${f.c}"><i></i>${f.n}</button>`).join('');
+  fc.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>pick(b.dataset.k)));
   w.addEventListener('keydown',e=>{const g=e.target.closest('.seg');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.k)}});
   window.clearFilter=()=>{if(filt)pick(filt)};
 })();
@@ -901,7 +911,7 @@ if(fine&&!reduce){
   const cur=$('#cursor');let cx=0,cy=0,px=0,py=0;
   addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;cur.style.opacity=1});
   document.addEventListener('mouseleave',()=>cur.style.opacity=0);
-  document.addEventListener('mouseover',e=>cur.classList.toggle('big',!!e.target.closest('a,button,.seg,.farm-pin,label')));
+  document.addEventListener('mouseover',e=>cur.classList.toggle('big',!!e.target.closest('a,button,.farm-pin,label')));
   (function loop(){px+=(cx-px)*.2;py+=(cy-py)*.2;cur.style.transform=`translate(${px}px,${py}px)`;requestAnimationFrame(loop)})();
 }
 if(!reduce&&'IntersectionObserver' in window){
